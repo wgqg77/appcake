@@ -1,0 +1,50 @@
+### 定时更新3个列表排序
+*/2 * * * *  cd  /data/deployer/app_op; /usr/bin/php ./yii ad-sort/update-sort
+
+### 排序列表app重复检查
+XXXX ./yii ad-sort/app-check
+
+### 每小时整点过5分钟更新 广告上下线
+* */5 * * *  cd  /data/deployer/app_op; /usr/bin/php ./yii ad-sort-update/check-ad-sort
+
+ ### 汇总数据合并到data_summary表 点击/下载/安装/激活 hook
+10 2 * * *  cd  /data/deployer/app_op; /usr/bin/php ./yii data_merge/ad-data
+15 2 * * *  cd  /data/deployer/app_op; /usr/bin/php ./yii data_merge/not-ad-data
+### 一周数据汇总
+10 2 * * *  cd  /data/deployer/app_op; /usr/bin/php ./yii data_merge_week/ad-data
+###  汇总appcake 按位置统计 点击/下载/安装 量汇总
+###  广告
+20 2 * * *  cd  /data/deployer/app_op; /usr/bin/php ./yii data_position_merge/ad-data
+###  非广告
+25 2 * * *  cd  /data/deployer/app_op; /usr/bin/php ./yii data_position_merge/not-ad-data
+
+
+### 发送昨日数据
+//读取数据接口
+./yii auto/yesterday-data
+//任务脚本bash
+0 2 * * * /bin/bash /data/deployer/app_op/bash/yesterActiveSendMail.sh
+
+
+### 汇总昨日数据 激活量及收入汇总
+35 1 * * *  cd  /data/deployer/app_op; /usr/bin/php ./yii active/active-record-data
+
+### 刷新排序列表 广告置顶  非广告按下载量追加
+* 2 * * 4  cd  /data/deployer/app_op; /usr/bin/php ./yii ad-sort-refresh/index
+
+### 整点过2分钟计算上个小时排序列表 汇总数据  ### 当前数据量较小暂不写入定时任务
+./yii ad-sort-history/history-data
+
+### 排序历史数据清理 7天清理一次
+* 2 * * 1  cd  /data/deployer/app_op; /usr/bin/php ./yii auto/del-sort-history
+
+
+### 汇总数据清理 60天清理一次
+* 2 * */1 *  cd  /data/deployer/app_op; /usr/bin/php  ./yii auto/delete-data
+
+### 定时汇总每日总量
+45 2 * * *        cd /data/deployer/app_op;  /usr/bin/php ./yii daily_statistics/merge
+
+
+
+
